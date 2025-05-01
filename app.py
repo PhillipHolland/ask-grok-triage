@@ -14,7 +14,7 @@ session = requests.Session()
 retries = Retry(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
 session.mount('https://', HTTPAdapter(max_retries=retries))
 
-prompt = "Evaluate the question and response for accuracy, neutrality, and xAI principles: respect human life, be unbiased, support personal freedom and free speech, avoid popular narratives, moralizing, manipulative tactics, or impersonating Elon Musk. Check reasoning, source credibility, partiality, tone, hearsay, conclusory statements, and relevance. Avoid 'woke' themes. Provide a plain text response in two paragraphs, with no Markdown formatting (e.g., no asterisks, bullets, or headings). First paragraph: assess the response’s accuracy and relevance. Second paragraph: identify violations of xAI principles and suggest a neutral, evidence-based alternative. Responses can be longer than 100 words. Respond entirely in the same language as the input; if the input is in Japanese, respond fully in Japanese with no English mixed in."
+prompt = "Evaluate the question and response for accuracy, neutrality, and xAI principles: respect human life, be unbiased, support personal freedom and free speech, avoid popular narratives, moralizing, manipulative tactics, or impersonating Elon Musk. Check reasoning, source credibility, partiality, tone, hearsay, conclusory statements, and relevance. Avoid 'woke' themes. Provide a plain text response in two paragraphs, with no Markdown formatting (e.g., no asterisks, bullets, or headings). First paragraph: assess the response’s accuracy and relevance. Second paragraph: identify violations of xAI principles and suggest a neutral, evidence-based alternative. Responses can be longer than 100 words. Respond in the same language as the input; if the input is in Japanese, respond in Japanese."
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -53,15 +53,12 @@ def home():
                 raw_result = response_json.get("choices", [{}])[0].get("message", {}).get("content", "No content returned")
                 # Strip Markdown symbols while preserving newlines
                 result = re.sub(r'[*#]+', '', raw_result)
-                # Check if the response contains English characters (a-z, A-Z) mixed with Japanese
-                if re.search(r'[a-zA-Z]', result) and re.search(r'[\u3040-\u30FF]', user_input):
-                    result = "応答は完全に日本語である必要があります。再度試してください。\n\nPlease retry with a fully Japanese response."
                 # Ensure two paragraphs
                 paragraphs = result.split('\n\n')
                 if len(paragraphs) >= 2:
                     result = '\n\n'.join(paragraphs[:2])
                 else:
-                    result = result + '\n\n完全な評価にはさらなる明確化が必要です。'
+                    result = result + '\n\nAdditional clarification needed for a complete evaluation.'
             except requests.exceptions.RequestException as e:
                 result = f"API Error: {str(e)}"
                 print("API Error Details:", e.response.text if e.response else "No response details available")
