@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 import requests
 import os
 import re
@@ -24,9 +24,10 @@ def home():
     pass_form = request.form.get('password', '')
     if pass_param != PASSWORD and pass_form != PASSWORD:
         if request.method == "POST" and pass_form:
-            return render_template("login.html", error="パスワードが間違っています。もう一度お試しください。")
+            return render_template("login.html", error="Incorrect password. Please try again.")
         return render_template("login.html", error="")
 
+    # Password is correct, proceed with triage
     result = ""
     question = ""
     response = ""
@@ -77,7 +78,8 @@ def home():
             except Exception as e:
                 result = f"Unexpected Error: {str(e)}"
                 print("Unexpected Error Details:", str(e))
-    return render_template("index.html", result=result, question=question, response=response)
+    # Pass the password as a query parameter to maintain authentication
+    return render_template("index.html", result=result, question=question, response=response, password=PASSWORD)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
