@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ask Grok Triage</title>
+    <title>Ask Grok Triage - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
@@ -11,108 +11,20 @@
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-    <script>
-        function copyResult() {
-            const resultText = document.getElementById("result-text").innerText;
-            navigator.clipboard.writeText(resultText).then(() => {
-                alert("Result copied to clipboard!");
-            }).catch(err => {
-                alert("Failed to copy: " + err);
-            });
-        }
-
-        function resetForm() {
-            document.getElementById("triage-form").reset();
-            document.getElementById("question").value = "";
-            document.getElementById("response").value = "";
-            document.getElementById("result-text").innerHTML = "<p class='text-gray-400'>No result available.</p>";
-        }
-
-        function showProgressBar() {
-            const progressBar = document.getElementById("progress-bar");
-            const triageButton = document.getElementById("triage-button");
-            progressBar.classList.remove("hidden");
-            triageButton.disabled = true;
-            triageButton.classList.add("opacity-50", "cursor-not-allowed");
-        }
-
-        function hideProgressBar() {
-            const progressBar = document.getElementById("progress-bar");
-            const triageButton = document.getElementById("triage-button");
-            progressBar.classList.add("hidden");
-            triageButton.disabled = false;
-            triageButton.classList.remove("opacity-50", "cursor-not-allowed");
-        }
-
-        function showRefineModal() {
-            document.getElementById("refine-modal").classList.remove("hidden");
-        }
-
-        function hideRefineModal() {
-            document.getElementById("refine-modal").classList.add("hidden");
-            document.getElementById("refine-instructions").value = "";
-        }
-
-        function submitRefineForm() {
-            showProgressBar();
-        }
-    </script>
 </head>
 <body class="bg-gray-900 flex items-center justify-center min-h-screen">
-    <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-3xl text-gray-100">
-        <h1 class="text-2xl font-bold mb-4 text-center text-gray-100">Ask Grok Triage</h1>
-        <form id="triage-form" method="POST" class="space-y-3" onsubmit="showProgressBar()">
-            <input type="hidden" name="form_type" value="triage">
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md text-gray-100">
+        <h1 class="text-2xl font-bold mb-4 text-center text-gray-100">Ask Grok Triage - Login</h1>
+        <form method="POST" class="space-y-3">
             <div>
-                <label class="block text-sm font-medium text-gray-300">Question</label>
-                <textarea id="question" name="question" class="mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" required>{{ question }}</textarea>
+                <label class="block text-sm font-medium text-gray-300">Password</label>
+                <input type="password" name="password" class="mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" required>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-300">Response</label>
-                <textarea id="response" name="response" class="mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" required>{{ response }}</textarea>
-            </div>
-            <button id="triage-button" type="submit" class="w-full bg-blue-600 text-gray-100 p-2 rounded-md hover:bg-blue-700">Triage</button>
-            <div id="progress-bar" class="hidden w-full bg-gray-600 rounded-full h-2.5">
-                <div class="bg-blue-500 h-2.5 rounded-full animate-pulse" style="width: 100%;"></div>
-            </div>
+            <button type="submit" class="w-full bg-blue-600 text-gray-100 p-2 rounded-md hover:bg-blue-700">Login</button>
         </form>
-        <button onclick="resetForm()" class="w-full mt-2 bg-gray-600 text-gray-100 p-2 rounded-md hover:bg-gray-500">New Question</button>
-        <div class="mt-4">
-            <div class="flex justify-between items-center mb-2">
-                <h2 class="text-md font-semibold text-gray-100">Result</h2>
-                <div>
-                    {% if result %}
-                    <button onclick="showRefineModal()" class="bg-green-600 text-gray-100 text-sm px-3 py-1 rounded-md hover:bg-green-700 mr-2">Refine This Result</button>
-                    {% endif %}
-                    <button onclick="copyResult(); hideProgressBar();" class="bg-gray-600 text-gray-100 text-sm px-3 py-1 rounded-md hover:bg-gray-500">Copy Text</button>
-                </div>
-            </div>
-            <div id="result-text" class="bg-gray-700 p-3 rounded-md text-sm border border-gray-600 overflow-y-auto max-h-64">
-                {% if result %}
-                    {% for paragraph in result.split('\n\n') %}
-                        <p class="text-gray-400 mb-2">{{ paragraph.strip() }}</p>
-                    {% endfor %}
-                {% else %}
-                    <p class="text-gray-400">No result available.</p>
-                {% endif %}
-            </div>
-        </div>
-        <!-- Refine Modal -->
-        <div id="refine-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md text-gray-100">
-                <h3 class="text-lg font-semibold mb-4">Refine This Result</h3>
-                <form method="POST" onsubmit="submitRefineForm()">
-                    <input type="hidden" name="form_type" value="refine">
-                    <input type="hidden" name="question" value="{{ question }}">
-                    <input type="hidden" name="response" value="{{ response }}">
-                    <textarea id="refine-instructions" name="refine_instructions" class="w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Enter refinement instructions (e.g., 'Make it more concise')" required></textarea>
-                    <div class="flex justify-end mt-4 space-x-2">
-                        <button type="button" onclick="hideRefineModal()" class="bg-gray-600 text-gray-100 px-4 py-2 rounded-md hover:bg-gray-500">Cancel</button>
-                        <button type="submit" class="bg-blue-600 text-gray-100 px-4 py-2 rounded-md hover:bg-blue-700">Refine</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        {% if error %}
+        <p class="text-red-400 mt-2 text-center">{{ error }}</p>
+        {% endif %}
     </div>
 </body>
 </html>
