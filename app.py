@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template
 import requests
 import os
 import re
@@ -7,7 +7,8 @@ from requests.packages.urllib3.util.retry import Retry
 
 app = Flask(__name__)
 api_key = "xai-sTJRqs1VlW6AYrVUPBc5unVmZkQysCmI4jQoC6SXmG0KVnrkfFbhBbxBs23NHRy661GxQYIBvJMgE91C"
-api_url = "https://api.x.ai/v1/completions"  # Updated endpoint
+api_url = "https://api.x.ai/v1/chat/completions"
+PASSWORD = "xAI-Triage2025!"  # Hardcoded password for team access
 
 # Set up requests session with retries
 session = requests.Session()
@@ -21,12 +22,11 @@ def home():
     # Check for password in query parameter or form submission
     pass_param = request.args.get('pass', '')
     pass_form = request.form.get('password', '')
-    if pass_param != "xAI-Triage2025!" and pass_form != "xAI-Triage2025!":
+    if pass_param != PASSWORD and pass_form != PASSWORD:
         if request.method == "POST" and pass_form:
-            return render_template("login.html", error="Incorrect password. Please try again.")
+            return render_template("login.html", error="パスワードが間違っています。もう一度お試しください。")
         return render_template("login.html", error="")
 
-    # Password is correct, proceed with triage
     result = ""
     question = ""
     response = ""
@@ -77,8 +77,7 @@ def home():
             except Exception as e:
                 result = f"Unexpected Error: {str(e)}"
                 print("Unexpected Error Details:", str(e))
-    # Pass the password as a query parameter to maintain authentication
-    return render_template("index.html", result=result, question=question, response=response, password="xAI-Triage2025!")
+    return render_template("index.html", result=result, question=question, response=response)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
