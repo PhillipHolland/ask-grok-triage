@@ -23,7 +23,7 @@
             <button type="submit" class="w-full bg-blue-600 text-gray-100 p-2 rounded-md hover:bg-blue-700">Login</button>
         </form>
         {% if error %}
-        <p class="text-red-400 mt-2 text-center">Incorrect password. Please try again.</p>
+        <p class="text-red-400 mt-2 text-center">{{ error }}</p>
         {% endif %}
     </div>
 </body>

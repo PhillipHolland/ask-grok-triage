@@ -8,7 +8,7 @@ from requests.packages.urllib3.util.retry import Retry
 app = Flask(__name__)
 app.secret_key = "xai-secure-session-key-2025"  # Secret key for session management
 api_key = "xai-sTJRqs1VlW6AYrVUPBc5unVmZkQysCmI4jQoC6SXmG0KVnrkfFbhBbxBs23NHRy661GxQYIBvJMgE91C"
-api_url = "https://api.x.ai/v1/chat/completions"  # Reverted to correct endpoint
+api_url = "https://api.x.ai/v1/chat/completions"  # Confirmed correct endpoint
 
 # Set up requests session with retries
 session_requests = requests.Session()
@@ -19,7 +19,7 @@ prompt = "Evaluate the question and response for accuracy, neutrality, and xAI p
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    # Check if user is authenticated
+    # Simplified login check using session
     if not session.get('authenticated'):
         if request.method == "POST":
             password = request.form.get("password", "")
@@ -27,13 +27,12 @@ def home():
                 session['authenticated'] = True
             else:
                 return render_template("login.html", error="Incorrect password. Please try again.")
-        else:
-            return render_template("login.html", error="")
+        return render_template("login.html", error="")
 
     result = ""
     question = ""
     response = ""
-    if request.method == "POST":
+    if request.method == "POST" and 'password' not in request.form:  # Skip password check for triage/refine
         form_type = request.form.get("form_type", "triage")
         question = request.form.get("question", "").encode('utf-8').decode('utf-8')
         response = request.form.get("response", "").encode('utf-8').decode('utf-8')
@@ -47,7 +46,7 @@ def home():
                 "Content-Type": "application/json; charset=utf-8"
             }
             data = {
-                "model": "grok",
+                "model": "grok",  # Keeping model as "grok" as it worked previously
                 "messages": [
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": user_input}
