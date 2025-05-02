@@ -6,7 +6,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
 app = Flask(__name__)
-api_key = "xai-sTJRqs1VlW6AYrVUPBc5unVmZkQysCmI4jQoC6SXmG0KVnrkfFbhBbxBs23NHRy661GxQYIBvJMgE91C"
+api_key = "xai-szxFy9UYdUyLmJuEZFc46Cfzcm5D9asT033qN5MlEqAb8BysZZdWh8Ol4FHhEupuRqaRqEP0dIoYQnXF"  # Updated API key
 api_url = "https://api.x.ai/v1/chat/completions"
 
 # Set up requests session with retries
@@ -35,12 +35,14 @@ def home():
                 "Content-Type": "application/json; charset=utf-8"
             }
             data = {
-                "model": "grok",
+                "model": "grok-3-latest",
                 "messages": [
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": user_input}
                 ],
-                "max_tokens": 500
+                "max_tokens": 500,
+                "stream": false,
+                "temperature": 0
             }
             try:
                 api_response = session.post(api_url, headers=headers, json=data, timeout=30)
