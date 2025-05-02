@@ -46,7 +46,7 @@ def home():
                         {"role": "user", "content": user_input}
                     ],
                     "max_tokens": 500,
-                    "stream": false,
+                    "stream": False,  # Fixed: changed 'false' to 'False'
                     "temperature": 0
                 }
                 print("Sending API request with data:", data)
