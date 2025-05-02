@@ -2,11 +2,12 @@ from flask import Flask, request, render_template
 import requests
 import os
 import re
+import traceback
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
 app = Flask(__name__)
-api_key = "xai-szxFy9UYdUyLmJuEZFc46Cfzcm5D9asT033qN5MlEqAb8BysZZdWh8Ol4FHhEupuRqaRqEP0dIoYQnXF"  # Updated API key
+api_key = "xai-szxFy9UYdUyLmJuEZFc46Cfzcm5D9asT033qN5MlEqAb8BysZZdWh8Ol4FHhEupuRqaRqEP0dIoYQnXF"
 api_url = "https://api.x.ai/v1/chat/completions"
 
 # Set up requests session with retries
@@ -18,33 +19,37 @@ prompt = "Evaluate the question and response for accuracy, neutrality, and xAI p
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    result = ""
-    question = ""
-    response = ""
-    if request.method == "POST":
-        form_type = request.form.get("form_type", "triage")
-        question = request.form.get("question", "").encode('utf-8').decode('utf-8')
-        response = request.form.get("response", "").encode('utf-8').decode('utf-8')
-        if question and response:
-            user_input = f"Question: {question}\nResponse: {response}"
-            if form_type == "refine":
-                refine_instructions = request.form.get("refine_instructions", "").encode('utf-8').decode('utf-8')
-                user_input += f"\nRefinement Instructions: {refine_instructions}"
-            headers = {
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json; charset=utf-8"
-            }
-            data = {
-                "model": "grok-3-latest",
-                "messages": [
-                    {"role": "system", "content": prompt},
-                    {"role": "user", "content": user_input}
-                ],
-                "max_tokens": 500,
-                "stream": false,
-                "temperature": 0
-            }
-            try:
+    try:
+        result = ""
+        question = ""
+        response = ""
+        print("Received request:", request.method, request.form)
+        if request.method == "POST":
+            form_type = request.form.get("form_type", "triage")
+            question = request.form.get("question", "").encode('utf-8').decode('utf-8')
+            response = request.form.get("response", "").encode('utf-8').decode('utf-8')
+            print("Question:", question)
+            print("Response:", response)
+            if question and response:
+                user_input = f"Question: {question}\nResponse: {response}"
+                if form_type == "refine":
+                    refine_instructions = request.form.get("refine_instructions", "").encode('utf-8').decode('utf-8')
+                    user_input += f"\nRefinement Instructions: {refine_instructions}"
+                headers = {
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json; charset=utf-8"
+                }
+                data = {
+                    "model": "grok-3-latest",
+                    "messages": [
+                        {"role": "system", "content": prompt},
+                        {"role": "user", "content": user_input}
+                    ],
+                    "max_tokens": 500,
+                    "stream": false,
+                    "temperature": 0
+                }
+                print("Sending API request with data:", data)
                 api_response = session.post(api_url, headers=headers, json=data, timeout=30)
                 print("API Request Headers:", headers)
                 print("API Request Data:", data)
@@ -64,12 +69,13 @@ def home():
                     result = '\n\n'.join(paragraphs[:2])
                 else:
                     result = result + '\n\n完全な評価にはさらなる明確化が必要です。'
-            except requests.exceptions.RequestException as e:
-                result = f"API Error: {str(e)}"
-                print("API Error Details:", e.response.text if e.response else "No response details available")
-            except Exception as e:
-                result = f"Unexpected Error: {str(e)}"
-                print("Unexpected Error Details:", str(e))
+    except requests.exceptions.RequestException as e:
+        result = f"API Error: {str(e)}"
+        print("API Error Details:", e.response.text if e.response else "No response details available")
+    except Exception as e:
+        result = f"Unexpected Error: {str(e)}"
+        print("Unexpected Error Details:", str(e))
+        print("Traceback:", traceback.format_exc())
     return render_template("index.html", result=result, question=question, response=response)
 
 if __name__ == "__main__":
