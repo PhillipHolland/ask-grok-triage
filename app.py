@@ -46,7 +46,7 @@ def home():
                         {"role": "user", "content": user_input}
                     ],
                     "max_tokens": 500,
-                    "stream": False,  # Fixed: changed 'false' to 'False'
+                    "stream": False,
                     "temperature": 0
                 }
                 print("Sending API request with data:", data)
@@ -70,8 +70,9 @@ def home():
                 else:
                     result = result + '\n\n完全な評価にはさらなる明確化が必要です。'
     except requests.exceptions.RequestException as e:
-        result = f"API Error: {str(e)}"
-        print("API Error Details:", e.response.text if e.response else "No response details available")
+        error_detail = e.response.text if e.response else "No response details available"
+        result = f"API Error: {str(e)}\nDetails: {error_detail}"
+        print("API Error Details:", error_detail)
     except Exception as e:
         result = f"Unexpected Error: {str(e)}"
         print("Unexpected Error Details:", str(e))
