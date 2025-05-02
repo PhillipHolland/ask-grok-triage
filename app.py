@@ -7,7 +7,7 @@ from requests.packages.urllib3.util.retry import Retry
 
 app = Flask(__name__)
 api_key = "xai-sTJRqs1VlW6AYrVUPBc5unVmZkQysCmI4jQoC6SXmG0KVnrkfFbhBbxBs23NHRy661GxQYIBvJMgE91C"
-api_url = "https://api.x.ai/v1/completions"  # Updated endpoint
+api_url = "https://api.x.ai/v1/chat/completions"  # Reverted to correct endpoint
 
 # Set up requests session with retries
 session = requests.Session()
@@ -36,7 +36,10 @@ def home():
             }
             data = {
                 "model": "grok",
-                "prompt": prompt + "\n\n" + user_input,  # Adjusted for /completions endpoint
+                "messages": [
+                    {"role": "system", "content": prompt},
+                    {"role": "user", "content": user_input}
+                ],
                 "max_tokens": 500
             }
             try:
@@ -47,7 +50,7 @@ def home():
                 api_response.raise_for_status()
                 response_json = api_response.json()
                 print("API Response Body:", response_json)
-                raw_result = response_json.get("choices", [{}])[0].get("text", "No content returned")  # Adjusted for /completions endpoint
+                raw_result = response_json.get("choices", [{}])[0].get("message", {}).get("content", "No content returned")
                 # Strip Markdown symbols while preserving newlines
                 result = re.sub(r'[*#]+', '', raw_result)
                 # Check if the response contains English characters (a-z, A-Z) mixed with Japanese
