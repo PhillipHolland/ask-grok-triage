@@ -68,7 +68,7 @@ def home():
                 else:
                     result = result + '\n\n完全な評価にはさらなる明確化が必要です。'
                 # Check if the response contains English characters (a-z, A-Z) mixed with Japanese
-                if re.search(r'[a-zA-Z]', result) and re.search(r'[\u3040-\u30FF]', user_input):
+                if re.search(r'[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]', user_input):
                     error = "応答は完全に日本語である必要があります。再度試してください。"
                     result = error
             except requests.exceptions.RequestException as e:
