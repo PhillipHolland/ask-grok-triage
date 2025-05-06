@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ask Grok Triage</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .title-font {
+            font-family: 'Montserrat', sans-serif;
         }
         @keyframes slow-pulse {
             0% { width: 20%; }
@@ -17,8 +21,13 @@
         .slow-pulse {
             animation: slow-pulse 2s ease-in-out infinite;
         }
+        textarea.auto-expand {
+            min-height: 60px;
+            max-height: 300px;
+            resize: none;
+            overflow-y: auto;
+        }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <script>
         function copyResult() {
             const resultText = document.getElementById("result-text").innerText;
@@ -35,6 +44,16 @@
             document.getElementById("question").value = "";
             document.getElementById("response").value = "";
             document.getElementById("result-text").innerHTML = "<p class='text-gray-400'>No result available.</p>";
+            updateCharCount('triager-notes');
+            updateCharCount('question');
+            autoExpand('question');
+            autoExpand('response');
+        }
+
+        function clearAll() {
+            resetForm();
+            document.getElementById("result-text").innerHTML = "<p class='text-gray-400'>No result available.</p>";
+            document.getElementById("error-message").innerHTML = "";
         }
 
         function showProgressBar() {
@@ -60,36 +79,61 @@
         function hideRefineModal() {
             document.getElementById("refine-modal").classList.add("hidden");
             document.getElementById("refine-instructions").value = "";
+            updateCharCount('refine-instructions');
         }
 
         function submitRefineForm() {
             showProgressBar();
         }
+
+        function updateCharCount(fieldId) {
+            const field = document.getElementById(fieldId);
+            const charCount = document.getElementById(fieldId + "-char-count");
+            const maxLength = 500;
+            const remaining = maxLength - field.value.length;
+            charCount.textContent = `${remaining} characters remaining`;
+            charCount.style.color = remaining < 50 ? 'red' : 'gray';
+        }
+
+        function autoExpand(fieldId) {
+            const field = document.getElementById(fieldId);
+            field.style.height = 'auto';
+            field.style.height = `${Math.min(field.scrollHeight, 300)}px`;
+        }
     </script>
 </head>
 <body class="bg-gray-900 flex items-center justify-center min-h-screen">
     <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-3xl text-gray-100">
-        <h1 class="text-2xl font-bold mb-4 text-center text-gray-100">Ask Grok Triage</h1>
+        <div class="flex items-center justify-center mb-4">
+            <img src="/static/robotic-goat-logo.png" alt="Robotic Goat Logo" class="h-12 w-12 mr-2">
+            <h1 class="text-2xl font-bold text-center text-gray-100 title-font">Ask Grok Triage</h1>
+        </div>
+        <div id="error-message" class="text-red-400 text-center mb-4"></div>
         <form id="triage-form" method="POST" class="space-y-3" onsubmit="showProgressBar()">
             <input type="hidden" name="form_type" value="triage">
             <div>
                 <label class="block text-sm font-medium text-gray-300">Triager Notes (Optional)</label>
-                <textarea id="triager-notes" name="triager_notes" class="mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" placeholder="Add guidance or note issues with the response">{{ triager_notes }}</textarea>
+                <textarea id="triager-notes" name="triager_notes" oninput="updateCharCount('triager-notes')" class="mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" placeholder="Add guidance or note issues with the response">{{ triager_notes }}</textarea>
+                <p id="triager-notes-char-count" class="text-sm text-gray-400">500 characters remaining</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-300">Question</label>
-                <textarea id="question" name="question" class="mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" required>{{ question }}</textarea>
+                <textarea id="question" name="question" oninput="updateCharCount('question'); autoExpand('question');" class="auto-expand mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" required>{{ question }}</textarea>
+                <p id="question-char-count" class="text-sm text-gray-400">500 characters remaining</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-300">Response</label>
-                <textarea id="response" name="response" class="mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" required>{{ response }}</textarea>
+                <textarea id="response" name="response" oninput="autoExpand('response');" class="auto-expand mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" required>{{ response }}</textarea>
             </div>
             <button id="triage-button" type="submit" class="w-full bg-blue-600 text-gray-100 p-2 rounded-md hover:bg-blue-700">Triage</button>
             <div id="progress-bar" class="hidden w-full bg-gray-500 rounded-full h-4">
                 <div class="bg-blue-400 h-4 rounded-full slow-pulse"></div>
             </div>
         </form>
-        <button onclick="resetForm()" class="w-full mt-2 bg-gray-600 text-gray-100 p-2 rounded-md hover:bg-gray-500">New Question</button>
+        <div class="flex space-x-2 mt-2">
+            <button onclick="resetForm()" class="w-full bg-gray-600 text-gray-100 p-2 rounded-md hover:bg-gray-500">New Question</button>
+            <button onclick="clearAll()" class="w-full bg-gray-600 text-gray-100 p-2 rounded-md hover:bg-gray-500">Clear All</button>
+        </div>
         <div class="mt-4">
             <div class="flex justify-between items-center mb-2">
                 <h2 class="text-md font-semibold text-gray-100">Result</h2>
@@ -120,7 +164,8 @@
                     <input type="hidden" name="response" value="{{ response }}">
                     <input type="hidden" name="triager_notes" value="{{ triager_notes }}">
                     <input type="hidden" name="previous_result" value="{{ previous_result }}">
-                    <textarea id="refine-instructions" name="refine_instructions" class="w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Enter refinement instructions (e.g., 'Make it more concise')" required></textarea>
+                    <textarea id="refine-instructions" name="refine_instructions" oninput="updateCharCount('refine-instructions')" class="w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Enter refinement instructions" required></textarea>
+                    <p id="refine-instructions-char-count" class="text-sm text-gray-400">500 characters remaining</p>
                     <div class="flex justify-end mt-4 space-x-2">
                         <button type="button" onclick="hideRefineModal()" class="bg-gray-600 text-gray-100 px-4 py-2 rounded-md hover:bg-gray-500">Cancel</button>
                         <button type="submit" class="bg-blue-600 text-gray-100 px-4 py-2 rounded-md hover:bg-blue-700">Refine</button>

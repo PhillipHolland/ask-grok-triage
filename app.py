@@ -14,11 +14,12 @@ session = requests.Session()
 retries = Retry(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
 session.mount('https://', HTTPAdapter(max_retries=retries))
 
-prompt = "Evaluate the question and response for accuracy, neutrality, and xAI principles: respect human life, be unbiased, support personal freedom and free speech, avoid popular narratives, moralizing, manipulative tactics, or impersonating Elon Musk. Check reasoning, source credibility, partiality, tone, hearsay, conclusory statements, and relevance. Avoid 'woke' themes. Provide a concise plain text response in two paragraphs, with no Markdown formatting (e.g., no asterisks, bullets, or headings). First paragraph: outline where the response failed. Second paragraph: provide an improved version with minimal explanation. Respond entirely in the same language as the input; if the input is in Japanese, respond fully in Japanese with no English mixed in. If refining a previous response, improve upon it based on the refinement instructions and triager notes without starting over."
+prompt = "Evaluate the question and response for accuracy, neutrality, and xAI principles: respect human life, be unbiased, support personal freedom and free speech, avoid popular narratives, moralizing, manipulative tactics, or impersonating Elon Musk. Check reasoning, source credibility, partiality, tone, hearsay, conclusory statements, and relevance. Avoid 'woke' themes. Provide a concise plain text response in two paragraphs, with no Markdown formatting (e.g., no asterisks, bullets, or headings). First paragraph: outline where the response failed. Second paragraph: provide an improved version with minimal explanation. Respond entirely in the same language as the input; if the input is in Japanese, respond fully in Japanese with no English mixed in, translating all terms, citations, references, and any other content into Japanese, even if originally in English. If refining a previous response, improve upon it based on the refinement instructions and triager notes without starting over."
 
 @app.route("/", methods=["GET", "POST"])
 def home():
     result = ""
+    error = ""
     question = ""
     response = ""
     triager_notes = ""
@@ -60,22 +61,25 @@ def home():
                 raw_result = response_json.get("choices", [{}])[0].get("message", {}).get("content", "No content returned")
                 # Strip Markdown symbols while preserving newlines
                 result = re.sub(r'[*#]+', '', raw_result)
-                # Check if the response contains English characters (a-z, A-Z) mixed with Japanese
-                if re.search(r'[a-zA-Z]', result) and re.search(r'[\u3040-\u30FF]', user_input):
-                    result = "応答は完全に日本語である必要があります。再度試してください。\n\nPlease retry with a fully Japanese response."
                 # Ensure two paragraphs
                 paragraphs = result.split('\n\n')
                 if len(paragraphs) >= 2:
                     result = '\n\n'.join(paragraphs[:2])
                 else:
                     result = result + '\n\n完全な評価にはさらなる明確化が必要です。'
+                # Check if the response contains English characters (a-z, A-Z) mixed with Japanese
+                if re.search(r'[a-zA-Z]', result) and re.search(r'[\u3040-\u30FF]', user_input):
+                    error = "応答は完全に日本語である必要があります。再度試してください。"
+                    result = error
             except requests.exceptions.RequestException as e:
-                result = f"API Error: {str(e)}"
+                error = "APIエラー: しばらくしてから再度お試しください。"
+                result = "リクエスト処理中にエラーが発生しました。しばらくしてから再度お試しください。"
                 print("API Error Details:", e.response.text if e.response else "No response details available")
             except Exception as e:
-                result = f"Unexpected Error: {str(e)}"
+                error = "予期しないエラー: しばらくしてから再度お試しください。"
+                result = "予期しないエラーが発生しました。しばらくしてから再度お試しください。"
                 print("Unexpected Error Details:", str(e))
-    return render_template("index.html", result=result, question=question, response=response, triager_notes=triager_notes, previous_result=result)
+    return render_template("index.html", result=result, error=error, question=question, response=response, triager_notes=triager_notes, previous_result=result)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
