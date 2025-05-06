@@ -44,8 +44,6 @@
             document.getElementById("question").value = "";
             document.getElementById("response").value = "";
             document.getElementById("result-text").innerHTML = "<p class='text-gray-400'>No result available.</p>";
-            updateCharCount('triager-notes');
-            updateCharCount('question');
             autoExpand('question');
             autoExpand('response');
         }
@@ -79,20 +77,10 @@
         function hideRefineModal() {
             document.getElementById("refine-modal").classList.add("hidden");
             document.getElementById("refine-instructions").value = "";
-            updateCharCount('refine-instructions');
         }
 
         function submitRefineForm() {
             showProgressBar();
-        }
-
-        function updateCharCount(fieldId) {
-            const field = document.getElementById(fieldId);
-            const charCount = document.getElementById(fieldId + "-char-count");
-            const maxLength = 500;
-            const remaining = maxLength - field.value.length;
-            charCount.textContent = `${remaining} characters remaining`;
-            charCount.style.color = remaining < 50 ? 'red' : 'gray';
         }
 
         function autoExpand(fieldId) {
@@ -113,13 +101,11 @@
             <input type="hidden" name="form_type" value="triage">
             <div>
                 <label class="block text-sm font-medium text-gray-300">Triager Notes (Optional)</label>
-                <textarea id="triager-notes" name="triager_notes" oninput="updateCharCount('triager-notes')" class="mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" placeholder="Add guidance or note issues with the response">{{ triager_notes }}</textarea>
-                <p id="triager-notes-char-count" class="text-sm text-gray-400">500 characters remaining</p>
+                <textarea id="triager-notes" name="triager_notes" class="mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" placeholder="Add guidance or note issues with the response">{{ triager_notes }}</textarea>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-300">Question</label>
-                <textarea id="question" name="question" oninput="updateCharCount('question'); autoExpand('question');" class="auto-expand mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" required>{{ question }}</textarea>
-                <p id="question-char-count" class="text-sm text-gray-400">500 characters remaining</p>
+                <textarea id="question" name="question" oninput="autoExpand('question');" class="auto-expand mt-1 w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="2" required>{{ question }}</textarea>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-300">Response</label>
@@ -164,8 +150,7 @@
                     <input type="hidden" name="response" value="{{ response }}">
                     <input type="hidden" name="triager_notes" value="{{ triager_notes }}">
                     <input type="hidden" name="previous_result" value="{{ previous_result }}">
-                    <textarea id="refine-instructions" name="refine_instructions" oninput="updateCharCount('refine-instructions')" class="w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Enter refinement instructions" required></textarea>
-                    <p id="refine-instructions-char-count" class="text-sm text-gray-400">500 characters remaining</p>
+                    <textarea id="refine-instructions" name="refine_instructions" class="w-full p-2 border rounded-md bg-gray-700 text-gray-100 border-gray-600 focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Enter refinement instructions" required></textarea>
                     <div class="flex justify-end mt-4 space-x-2">
                         <button type="button" onclick="hideRefineModal()" class="bg-gray-600 text-gray-100 px-4 py-2 rounded-md hover:bg-gray-500">Cancel</button>
                         <button type="submit" class="bg-blue-600 text-gray-100 px-4 py-2 rounded-md hover:bg-blue-700">Refine</button>
