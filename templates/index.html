@@ -63,6 +63,37 @@
         .severity-circle:hover .severity-tooltip {
             visibility: visible;
         }
+        .triage-badge {
+            position: relative;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        .triage-badge:hover {
+            transform: scale(1.1);
+        }
+        .triage-tooltip {
+            visibility: hidden;
+            background-color: #1F2937;
+            color: #D1D5DB;
+            text-align: center;
+            border-radius: 4px;
+            padding: 4px 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .triage-badge:hover .triage-tooltip {
+            visibility: visible;
+        }
     </style>
     <script>
         function copyResult() {
@@ -82,6 +113,7 @@
             document.getElementById("result-text").innerHTML = "<p class='text-gray-400'>No result available.</p>";
             document.getElementById("error-message").innerHTML = "";
             document.getElementById("severity-rating").innerHTML = "";
+            document.getElementById("triage-rating").innerHTML = "";
             autoExpand('question');
             autoExpand('response');
         }
@@ -160,8 +192,13 @@
                         {{ severity }}
                         <span class="severity-tooltip">Severity: {{ severity }}/10</span>
                     </div>
+                    <div id="triage-rating" class="triage-badge mr-2 {% if triage == 'P0' %}bg-red-600{% elif triage == 'P1' %}bg-yellow-600{% else %}bg-green-600{% endif %} text-white">
+                        {{ triage }}
+                        <span class="triage-tooltip">Priority: {{ triage }} - {% if triage == 'P0' %}Critical{% elif triage == 'P1' %}Moderate{% else %}Minor{% endif %}</span>
+                    </div>
                     {% else %}
                     <div id="severity-rating" class="mr-2"></div>
+                    <div id="triage-rating" class="mr-2"></div>
                     {% endif %}
                     {% if result %}
                     <button onclick="showRefineModal()" class="bg-green-600 text-gray-100 text-sm px-3 py-1 rounded-md hover:bg-green-700 mr-2">Refine This Result</button>
