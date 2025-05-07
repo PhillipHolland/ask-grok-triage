@@ -45,6 +45,7 @@
             document.getElementById("response").value = "";
             document.getElementById("result-text").innerHTML = "<p class='text-gray-400'>No result available.</p>";
             document.getElementById("error-message").innerHTML = "";
+            document.getElementById("severity-rating").innerHTML = "";
             autoExpand('question');
             autoExpand('response');
         }
@@ -118,6 +119,11 @@
             <div class="flex justify-between items-center mb-2">
                 <h2 class="text-md font-semibold text-gray-100">Result</h2>
                 <div>
+                    {% if severity is not none %}
+                    <span id="severity-rating" class="text-sm text-gray-400 mr-2">Severity: {{ severity }}/10</span>
+                    {% else %}
+                    <span id="severity-rating" class="text-sm text-gray-400 mr-2"></span>
+                    {% endif %}
                     {% if result %}
                     <button onclick="showRefineModal()" class="bg-green-600 text-gray-100 text-sm px-3 py-1 rounded-md hover:bg-green-700 mr-2">Refine This Result</button>
                     {% endif %}
