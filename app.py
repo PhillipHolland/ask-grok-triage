@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.secret_key = "xai-secure-session-key-2025"  # Secret key for session management
 api_key = "xai-sTJRqs1VlW6AYrVUPBc5unVmZkQysCmI4jQoC6SXmG0KVnrkfFbhBbxBs23NHRy661GxQYIBvJMgE91C"
 api_url = "https://api.x.ai/v1/chat/completions"
-PASSWORD = "xAI-Triage2025!"  # Hardcoded password for team access
+PASSWORD = "kX9#mP$vL2jQ8wR5!"  # Updated secure password
 
 # Set up requests session with retries
 api_session = requests.Session()
