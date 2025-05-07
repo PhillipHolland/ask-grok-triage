@@ -27,6 +27,42 @@
             resize: none;
             overflow-y: auto;
         }
+        .severity-circle {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            background: conic-gradient(from 0deg, #3B82F6, #60A5FA calc(var(--percentage) * 1%), #4B5563 calc(var(--percentage) * 1%), #4B5563 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        .severity-circle:hover {
+            transform: scale(1.1);
+        }
+        .severity-tooltip {
+            visibility: hidden;
+            background-color: #1F2937;
+            color: #D1D5DB;
+            text-align: center;
+            border-radius: 4px;
+            padding: 4px 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .severity-circle:hover .severity-tooltip {
+            visibility: visible;
+        }
     </style>
     <script>
         function copyResult() {
@@ -118,11 +154,14 @@
         <div class="mt-4">
             <div class="flex justify-between items-center mb-2">
                 <h2 class="text-md font-semibold text-gray-100">Result</h2>
-                <div>
+                <div class="flex items-center">
                     {% if severity is not none %}
-                    <span id="severity-rating" class="text-sm text-gray-400 mr-2">Severity: {{ severity }}/10</span>
+                    <div id="severity-rating" class="severity-circle mr-2" style="--percentage: {{ severity * 10 }}">
+                        {{ severity }}
+                        <span class="severity-tooltip">Severity: {{ severity }}/10</span>
+                    </div>
                     {% else %}
-                    <span id="severity-rating" class="text-sm text-gray-400 mr-2"></span>
+                    <div id="severity-rating" class="mr-2"></div>
                     {% endif %}
                     {% if result %}
                     <button onclick="showRefineModal()" class="bg-green-600 text-gray-100 text-sm px-3 py-1 rounded-md hover:bg-green-700 mr-2">Refine This Result</button>
