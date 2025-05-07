@@ -21,6 +21,7 @@ def home():
     result = ""
     severity = None
     triage = None
+    reason = ""
     error = ""
     question = ""
     response = ""
@@ -68,6 +69,8 @@ def home():
                 # Take the first two paragraphs as the result
                 if len(parts) >= 2:
                     result = '\n\n'.join(parts[:2])
+                    # Extract the reason from the first paragraph
+                    reason = parts[0] if parts[0] else "No specific issues identified."
                     # Extract severity and triage from the remaining parts
                     remaining_text = '\n\n'.join(parts[2:])
                     severity_match = re.search(r'Severity: (\d+)', remaining_text)
@@ -91,6 +94,7 @@ def home():
                         result = raw_result + '\n\n完全な評価にはさらなる明確化が必要です。'
                     else:
                         result = raw_result + '\n\nAdditional clarification needed for a complete evaluation.'
+                    reason = "Incomplete evaluation due to insufficient response length."
                 # Check if the input contains Japanese characters
                 is_japanese_input = re.search(r'[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]', user_input)
                 if is_japanese_input:
@@ -100,6 +104,7 @@ def home():
                         result = error
                         severity = None
                         triage = None
+                        reason = "Response contains non-Japanese characters."
                 else:
                     # For English input, ensure the response has no Japanese
                     if re.search(r'[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]', result):
@@ -107,26 +112,31 @@ def home():
                         result = error
                         severity = None
                         triage = None
+                        reason = "Response contains Japanese characters."
             except requests.exceptions.RequestException as e:
                 # Check input language for error message
                 is_japanese_input = re.search(r'[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]', user_input)
                 if is_japanese_input:
                     error = "APIエラー: しばらくしてから再度お試しください。"
                     result = "リクエスト処理中にエラーが発生しました。しばらくしてから再度お試しください。"
+                    reason = "API request failed."
                 else:
                     error = "API Error: Please try again later."
                     result = "An error occurred while processing your request. Please try again later."
+                    reason = "API request failed."
                 print("API Error Details:", e.response.text if e.response else "No response details available")
             except Exception as e:
                 is_japanese_input = re.search(r'[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]', user_input)
                 if is_japanese_input:
                     error = "予期しないエラー: しばらくしてから再度お試しください。"
                     result = "予期しないエラーが発生しました。しばらくしてから再度お試しください。"
+                    reason = "Unexpected error occurred."
                 else:
                     error = "Unexpected Error: Please try again later."
                     result = "An unexpected error occurred. Please try again later."
+                    reason = "Unexpected error occurred."
                 print("Unexpected Error Details:", str(e))
-    return render_template("index.html", result=result, severity=severity, triage=triage, error=error, question=question, response=response, triager_notes=triager_notes, previous_result=result)
+    return render_template("index.html", result=result, severity=severity, triage=triage, reason=reason, error=error, question=question, response=response, triager_notes=triager_notes, previous_result=result)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
