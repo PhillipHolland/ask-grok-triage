@@ -95,7 +95,7 @@ def home():
                 is_japanese_input = re.search(r'[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]', user_input)
                 if is_japanese_input:
                     # For Japanese input, ensure the response has no English
-                    if re.search(r'[a-zA-Z]', result):
+                    if not re.search(r'[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]', result):
                         error = "応答は完全に日本語である必要があります。再度試してください。"
                         result = error
                         severity = None
