@@ -38,20 +38,15 @@
             });
         }
 
-        function resetForm() {
+        function clearForm() {
             document.getElementById("triage-form").reset();
             document.getElementById("triager-notes").value = "";
             document.getElementById("question").value = "";
             document.getElementById("response").value = "";
             document.getElementById("result-text").innerHTML = "<p class='text-gray-400'>No result available.</p>";
+            document.getElementById("error-message").innerHTML = "";
             autoExpand('question');
             autoExpand('response');
-        }
-
-        function clearAll() {
-            resetForm();
-            document.getElementById("result-text").innerHTML = "<p class='text-gray-400'>No result available.</p>";
-            document.getElementById("error-message").innerHTML = "";
         }
 
         function showProgressBar() {
@@ -116,9 +111,8 @@
                 <div class="bg-blue-400 h-4 rounded-full slow-pulse"></div>
             </div>
         </form>
-        <div class="flex space-x-2 mt-2">
-            <button onclick="resetForm()" class="w-full bg-gray-600 text-gray-100 p-2 rounded-md hover:bg-gray-500">New Question</button>
-            <button onclick="clearAll()" class="w-full bg-gray-600 text-gray-100 p-2 rounded-md hover:bg-gray-500">Clear All</button>
+        <div class="mt-2">
+            <button onclick="clearForm()" class="w-full bg-gray-600 text-gray-100 p-2 rounded-md hover:bg-gray-500">Clear</button>
         </div>
         <div class="mt-4">
             <div class="flex justify-between items-center mb-2">
